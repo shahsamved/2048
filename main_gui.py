@@ -12,6 +12,8 @@ from game_board import GameBoard
 # from ai import AI
 from expectimax import ExpectimaxAI
 from mcts import MCTSNode
+from Qlearning import DQNAgent
+
 
 SIZE = 500
 GRID_LEN = 4
@@ -41,10 +43,11 @@ class GameGrid(Frame):
         # self.AI = AI()
         self.Expectimax = ExpectimaxAI()
         self.MCTS = MCTSNode()
+        self.dqn_agent = DQNAgent(16, 4)
 
         self.algorithm_var = StringVar(self)
         self.algorithm_var.set("mcts")  # Default algorithm
-        algorithm_menu = OptionMenu(self, self.algorithm_var, "expectimax","mcts")
+        algorithm_menu = OptionMenu(self, self.algorithm_var, "expectimax","mcts","dqn")
         algorithm_menu.grid(row=0, column=5, padx=10, pady=10)
 
         self.run_game()
@@ -62,6 +65,8 @@ class GameGrid(Frame):
             elif move_algorithm == "mcts":
                 mcts_thread = threading.Thread(target=self.run_mcts)
                 mcts_thread.start()
+            elif move_algorithm == "dqn":
+                self.board.move(self.dqn_agent.get_action(self.board))
             else:
                 raise ValueError("Invalid algorithm selected")
             self.board.move(self.Expectimax.get_move(self.board))
