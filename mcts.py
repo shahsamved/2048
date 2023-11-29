@@ -2,12 +2,22 @@ import math
 import random
 
 class MCTSNode:
-    def __init__(self, state, parent=None):
+    def __init__(self, state = None, parent=None):
         self.state = state
         self.parent = parent
         self.children = []
         self.visits = 0
         self.score = 0
+
+    def mcts(self, board, iterations=1000):
+        root = MCTSNode(board.clone())
+        for _ in range(iterations):
+            selected_node = select(root)
+            expanded_node = expand(selected_node)
+            simulation_result = simulate(expanded_node)
+            backpropagate(expanded_node, simulation_result)
+        best_child = max(root.children, key=lambda child: child.visits)
+        return best_child.state
 
 def select(node):
     while node.children:
@@ -44,3 +54,4 @@ def ucb(node):
     if node.visits == 0:
         return float('inf')
     return (node.score / node.visits) + exploration_weight * math.sqrt(math.log(node.parent.visits) / node.visits)
+

@@ -9,7 +9,9 @@ from random import randint
 import time
 
 from game_board import GameBoard
-from ai import AI
+# from ai import AI
+from expectimax import ExpectimaxAI
+from mcts import MCTSNode
 
 SIZE = 500
 GRID_LEN = 4
@@ -36,7 +38,9 @@ class GameGrid(Frame):
         self.init_grid()
         self.init_matrix()
         self.update_grid_cells()
-        self.AI = AI()
+        # self.AI = AI()
+        self.Expectimax = ExpectimaxAI()
+        self.MCTS = MCTSNode()
 
         self.algorithm_var = StringVar(self)
         self.algorithm_var.set("mcts")  # Default algorithm
@@ -48,19 +52,19 @@ class GameGrid(Frame):
     
     def run_mcts(self):
         iterations = 100  
-        self.board = self.AI.mcts(self.board, iterations)
+        self.board = self.MCTS.mcts(self.board, iterations)
 
     def run_game(self):
         while True:
             move_algorithm = self.algorithm_var.get()
             if move_algorithm == "expectimax":
-                self.board.move(self.AI.get_move(self.board))
+                self.board.move(self.Expectimax.get_move(self.board))
             elif move_algorithm == "mcts":
                 mcts_thread = threading.Thread(target=self.run_mcts)
                 mcts_thread.start()
             else:
                 raise ValueError("Invalid algorithm selected")
-            self.board.move(self.AI.get_move(self.board))
+            self.board.move(self.Expectimax.get_move(self.board))
             self.update_grid_cells()
             self.add_random_tile()
             self.update_grid_cells()
