@@ -8,8 +8,21 @@ UP, DOWN, LEFT, RIGHT = range(4)
 
 class ExpectimaxAI():
 
+    def __init__(self):
+        self.total_time_taken = 0
+        self.total_computation_time = 0
+        self.tile_values = [8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536]
+        self.scores = []
+        self.move_counts = []
+
     def get_move(self, board):
+        start_time = time.time()
         best_move, _ = self.maximize(board)
+        end_time = time.time()
+
+        time_taken = end_time - start_time
+        self.total_time_taken += time_taken
+
         return best_move
 
     def eval_board(self, board, n_empty): 
@@ -98,6 +111,44 @@ class ExpectimaxAI():
                 utility_sum[i] += utility[i] * t[2]
 
         return tuple(utility_sum)
+    
+
+    def evaluate_strategy(self, board, num_games=10):
+        for game_num in range(1, num_games + 1):
+            print(f"Starting Game {game_num}")
+            start_time = time.time()
+            game_board = board.clone()
+            total_score = 0
+            total_moves = 0
+
+            while len(game_board.get_available_moves()) > 0:
+                move = self.get_move(game_board)
+                total_score += game_board.score
+                total_moves += 1
+                game_board.move(move)
+
+            end_time = time.time()
+            print(f"Game {game_num} - Final Score: {total_score}, Total Moves: {total_moves}")
+            print(f"Game {game_num} - Final Board:")
+            print(game_board)
+
+            self.total_computation_time += end_time - start_time
+
+            self.scores.append(total_score)
+            self.move_counts.append(total_moves)
+
+        self.print_metrics()
+        
+    def print_metrics(self):
+        print("Strategy Evaluation Metrics:")
+        print(f"Time Taken: {self.total_time_taken} seconds")
+        print(f"Computation Time: {self.total_computation_time} seconds")
+        print(f"Tile Values: {self.tile_values}")
+        print("\nPerformance Metrics:")
+        print(f"Average Score: {np.mean(self.scores)}")
+        print(f"Median Score: {np.median(self.scores)}")
+        print(f"Average Move Count: {np.mean(self.move_counts)}")
+        print(f"Median Moves: {np.median(self.move_counts)}")
     
     # def mcts(self, board, iterations=1000):
     #     root = MCTSNode(board.clone())

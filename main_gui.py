@@ -11,7 +11,7 @@ import time
 from game_board import GameBoard
 # from ai import AI
 from expectimax import ExpectimaxAI
-from mcts import MCTSNode
+from mcts import MCTSNode,mcts
 from Qlearning import DQNAgent
 
 
@@ -41,12 +41,13 @@ class GameGrid(Frame):
         self.init_matrix()
         self.update_grid_cells()
         # self.AI = AI()
+        self.total_time_taken = 0
         self.Expectimax = ExpectimaxAI()
         self.MCTS = MCTSNode()
         self.dqn_agent = DQNAgent(16, 4)
 
         self.algorithm_var = StringVar(self)
-        self.algorithm_var.set("mcts")  # Default algorithm
+        self.algorithm_var.set("dqn")  # Default algorithm
         algorithm_menu = OptionMenu(self, self.algorithm_var, "expectimax","mcts","dqn")
         algorithm_menu.grid(row=0, column=5, padx=10, pady=10)
 
@@ -54,14 +55,18 @@ class GameGrid(Frame):
         self.mainloop()
     
     def run_mcts(self):
-        iterations = 100  
-        self.board = self.MCTS.mcts(self.board, iterations)
+        iterations = 1 
+        self.board = mcts(self.board, iterations)
 
     def run_game(self):
         while True:
             move_algorithm = self.algorithm_var.get()
             if move_algorithm == "expectimax":
+                start_time = time.time()
                 self.board.move(self.Expectimax.get_move(self.board))
+                end_time = time.time()
+                self.total_time_taken += end_time - start_time
+    
             elif move_algorithm == "mcts":
                 mcts_thread = threading.Thread(target=self.run_mcts)
                 mcts_thread.start()
@@ -79,6 +84,9 @@ class GameGrid(Frame):
                 break
 
             self.update()
+    def print_strategy_metrics(self):
+        self.Expectimax.evaluate_strategy(self.board, num_games=10)
+        self.Expectimax.print_metrics()
         
     def game_over_display(self):
         for i in range(4):
@@ -152,3 +160,4 @@ class GameGrid(Frame):
             return pos
 
 gamegrid = GameGrid()
+gamegrid.print_strategy_metrics()
