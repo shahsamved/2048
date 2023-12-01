@@ -43,38 +43,44 @@ class GameGrid(Frame):
         # self.AI = AI()
         self.total_time_taken = 0
         self.Expectimax = ExpectimaxAI()
-        self.MCTS = MCTSNode()
+        # self.MCTS = MCTSNode()
+        self.MCTS = MCTSNode(state=self.board.clone())
         self.dqn_agent = DQNAgent(16, 4)
 
         self.algorithm_var = StringVar(self)
-        self.algorithm_var.set("dqn")  # Default algorithm
+        self.algorithm_var.set("mcts")  # Default algorithm
         algorithm_menu = OptionMenu(self, self.algorithm_var, "expectimax","mcts","dqn")
         algorithm_menu.grid(row=0, column=5, padx=10, pady=10)
 
         self.run_game()
         self.mainloop()
     
+    # def run_mcts(self):
+    #     iterations = 1 
+    #     self.board = mcts(self.board, iterations)
+
     def run_mcts(self):
-        iterations = 1 
-        self.board = mcts(self.board, iterations)
+        iterations = 1000  # You can adjust the number of iterations
+        final_state = mcts(self.board, iterations)
+        self.board = final_state
+        self.update_grid_cells()
 
     def run_game(self):
         while True:
             move_algorithm = self.algorithm_var.get()
-            if move_algorithm == "expectimax":
+            if move_algorithm == "mcts":
                 start_time = time.time()
                 self.board.move(self.Expectimax.get_move(self.board))
                 end_time = time.time()
                 self.total_time_taken += end_time - start_time
     
             elif move_algorithm == "mcts":
-                mcts_thread = threading.Thread(target=self.run_mcts)
-                mcts_thread.start()
+                self.run_mcts()
             elif move_algorithm == "dqn":
                 self.board.move(self.dqn_agent.get_action(self.board))
             else:
                 raise ValueError("Invalid algorithm selected")
-            self.board.move(self.Expectimax.get_move(self.board))
+            # self.board.move(self.Expectimax.get_move(self.board))
             self.update_grid_cells()
             self.add_random_tile()
             self.update_grid_cells()

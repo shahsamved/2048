@@ -118,16 +118,18 @@ class ExpectimaxAI():
             print(f"Starting Game {game_num}")
             start_time = time.time()
             game_board = board.clone()
-            total_score = 0
             total_moves = 0
 
             while len(game_board.get_available_moves()) > 0:
                 move = self.get_move(game_board)
-                total_score += game_board.score
                 total_moves += 1
                 game_board.move(move)
 
             end_time = time.time()
+
+            max_tile = game_board.get_max_tile()
+            total_score = max_tile
+
             print(f"Game {game_num} - Final Score: {total_score}, Total Moves: {total_moves}")
             print(f"Game {game_num} - Final Board:")
             print(game_board)
@@ -138,7 +140,7 @@ class ExpectimaxAI():
             self.move_counts.append(total_moves)
 
         self.print_metrics()
-        
+
     def print_metrics(self):
         print("Strategy Evaluation Metrics:")
         print(f"Time Taken: {self.total_time_taken} seconds")
