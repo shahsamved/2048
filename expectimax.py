@@ -25,33 +25,29 @@ class ExpectimaxAI():
 
         return best_move
 
-    def eval_board(self, board, n_empty): 
+    def evaluate_board(self, board, n_empty): 
         grid = board.grid
 
         utility = 0
         smoothness = 0
 
-        big_t = np.sum(np.power(grid, 2))
-        s_grid = np.sqrt(grid)
-        smoothness -= np.sum(np.abs(s_grid[::,0] - s_grid[::,1]))
-        smoothness -= np.sum(np.abs(s_grid[::,1] - s_grid[::,2]))
-        smoothness -= np.sum(np.abs(s_grid[::,2] - s_grid[::,3]))
-        smoothness -= np.sum(np.abs(s_grid[0,::] - s_grid[1,::]))
-        smoothness -= np.sum(np.abs(s_grid[1,::] - s_grid[2,::]))
-        smoothness -= np.sum(np.abs(s_grid[2,::] - s_grid[3,::]))
-        
-        empty_w = 100000
-        smoothness_w = 3
+        tile_score = np.sum(np.power(grid, 2))
 
-        empty_u = n_empty * empty_w
-        smooth_u = smoothness ** smoothness_w
-        big_t_u = big_t
+        for i in range(4):
+            for j in range(3):
+                smoothness -= abs(np.sqrt(grid[i, j]) - np.sqrt(grid[i, j + 1]))
+                smoothness -= abs(np.sqrt(grid[j, i]) - np.sqrt(grid[j + 1, i]))
 
-        utility += big_t
-        utility += empty_u
-        utility += smooth_u
+        weight_empty = 100000
+        weight_smoothness = 3
 
-        return (utility, empty_u, smooth_u, big_t_u)
+        utility_empty = n_empty * weight_empty
+        utility_smoothness = smoothness ** weight_smoothness
+
+        utility = tile_score + utility_empty + utility_smoothness
+
+        return (utility, utility_empty, utility_smoothness, tile_score)
+
 
     def maximize(self, board, depth = 0):
         moves = board.get_available_moves()
@@ -79,13 +75,13 @@ class ExpectimaxAI():
         n_empty = len(empty_cells)
 
         #if n_empty >= 7 and depth >= 5:
-        #    return self.eval_board(board, n_empty)
+        #    return self.evaluate_board(board, n_empty)
 
         if n_empty >= 6 and depth >= 3:
-            return self.eval_board(board, n_empty)
+            return self.evaluate_board(board, n_empty)
 
         if n_empty >= 0 and depth >= 5:
-            return self.eval_board(board, n_empty)
+            return self.evaluate_board(board, n_empty)
 
         if n_empty == 0:
             _, utility = self.maximize(board, depth + 1)

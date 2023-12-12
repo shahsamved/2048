@@ -26,27 +26,23 @@ def mcts(root_state, iterations):
         new_node = MCTSNode(new_state, parent=node)
         node.children.append(new_node)
 
-        # Simulate
         simulation_result = simulate(new_state)
 
-        # Backpropagate
         backpropagate(new_node, simulation_result)
 
-    # Choose the best move
     best_child = select_best_child(root_node)
     return best_child.state
 
 def select_child(node):
-    exploration_weight = 1.41  # You can adjust this parameter
+    exploration_weight = 1.41  
     total_visits = sum(child.visits for child in node.children)
-    
-    # UCT (Upper Confidence Bound applied to Trees) formula
+
     uct_values = [(child.score / child.visits) + exploration_weight * math.sqrt(math.log(total_visits) / child.visits) for child in node.children]
     selected_child_index = uct_values.index(max(uct_values))
     return node.children[selected_child_index]
 
 def simulate(state):
-    max_depth = 10  # You can adjust this parameter
+    max_depth = 10  
     for _ in range(max_depth):
         available_moves = state.get_available_moves()
         if not available_moves:

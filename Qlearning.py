@@ -27,7 +27,6 @@ class DQNAgent:
         self.exploration_decay = exploration_decay
 
     def get_state_tensor(self, board):
-        # Convert the board state to a PyTorch tensor
         return torch.FloatTensor(board.grid.flatten()).to(self.device)
 
     def get_action(self, board):
@@ -75,7 +74,6 @@ class DQNAgent:
                 moved = next_state.move(action, get_avail_call=True)
 
                 if not moved:
-                    # Invalid move, penalize the agent
                     reward = -1
                 else:
                     reward = next_state.get_max_tile()
@@ -86,10 +84,8 @@ class DQNAgent:
                 state = next_state
 
                 if len(state.get_available_moves()) == 0:
-                    # Game over, break out of the loop
                     break
 
-            # Decay exploration rate
             self.exploration_rate *= self.exploration_decay
 
             print(f"Episode: {episode + 1}, Total Reward: {total_reward}")
